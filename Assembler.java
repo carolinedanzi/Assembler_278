@@ -26,7 +26,26 @@ public class Assembler {
 			BufferedReader br = new BufferedReader(new FileReader(inputFile));
 			
 			String line;
+			String instruction;
+			Integer instType;
+			
 			while((line = br.readLine()) != null){
+				instruction = getInstruction(line);
+				instType = instTypeTable.get(instruction);
+				
+				switch(instType) {
+					case 1: 
+						doR_Format(line);
+						break;
+					case 2:
+						doI_Format(line);
+						break;
+					case 3:
+						doJ_Format(line);
+						break;
+					default:
+						System.out.println(line);
+				}
 				System.out.println(line);
 			}	
 			
@@ -64,5 +83,35 @@ public class Assembler {
 	*/
 	public static String getInstruction(String line) {
 		return "";
+	}
+	
+	/**
+	* Takes in a line of assembly code and prints the hexadecimal
+	* representation of that line to a file.  This line uses R-format.
+	*
+	* @param line	a line of assembly code, as a String
+	*/
+	public static void doR_Format(String line) {
+		
+	}
+	
+	/**
+	* Takes in a line of assembly code and prints the hexadecimal
+	* representation of that line to a file.  This line uses I-format.
+	*
+	* @param line	a line of assembly code, as a String
+	*/
+	public static void doI_Format(String line) {
+		
+	}
+	
+	/**
+	* Takes in a line of assembly code and prints the hexadecimal
+	* representation of that line to a file.  This line uses J-format.
+	*
+	* @param line	a line of assembly code, as a String
+	*/
+	public static void doJ_Format(String line) {
+		
 	}
 }
