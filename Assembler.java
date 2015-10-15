@@ -178,12 +178,13 @@ public class Assembler {
 	*/
 	public static void doR_Format(String line) {
 		// R-format has the following fields:
-		// opcode:	6 bits
+		// opcode:	6 bits - For R-format, this is always 000000
 		// rs:		5 bits
 		// rt: 		5 bits
 		// rd: 		5 bits
 		// shamt: 	5 bits
-		// funct: 	6 bits
+		// funct: 	6 bits - get this from the opcodeTable
+		
 		System.out.println("Made it to R-format " + line);
 		printToFile(line);
 	}
@@ -213,7 +214,7 @@ public class Assembler {
 		binary = binary << 16;
 		binary = binary | constant;
 		
-		System.out.println("0x" + Integer.toHexString);
+		System.out.println("0x" + Integer.toHexString(binary));
 	}
 	
 	/**
@@ -248,10 +249,10 @@ public class Assembler {
 	 * 
 	 * @param hex	the line to print to the file
 	 */
-	private static void printToFile(String hex) {
+	private static void printToFile(String line) {
 		try {
 			PrintWriter pr = new PrintWriter("output.txt");	
-			pr.println(hex);
+			pr.println(line);
 			pr.close();
 			
 		} catch(Exception e) {
