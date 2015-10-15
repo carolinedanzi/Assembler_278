@@ -16,8 +16,8 @@ import java.util.HashMap;
 public class Assembler {
 	
 	public static HashMap<String, Integer> instTypeTable;
-	// TODO: Decide on types for binary string
-	public static HashMap<String, String> registers;
+	public static HashMap<String, Integer> registerTable;
+	public static HashMap<String, Integer> opcodeTable;
 	
 	public static void main(String[] args) {
 		setup();
@@ -31,21 +31,23 @@ public class Assembler {
 			Integer instType;
 			
 			while((line = br.readLine()) != null){
-				instruction = getInstruction(line);
-				instType = instTypeTable.get(instruction);
+				if(line.length() != 0) {
+					instruction = getInstruction(line);
+					instType = instTypeTable.get(instruction);
 				
-				switch(instType) {
-					case 1: 
-						doR_Format(line);
-						break;
-					case 2:
-						doI_Format(line);
-						break;
-					case 3:
-						doJ_Format(line);
-						break;
-					default:
-						System.out.println("default" + line);
+					switch(instType) {
+						case 1: 
+							doR_Format(line);
+							break;
+						case 2:
+							doI_Format(line);
+							break;
+						case 3:
+							doJ_Format(line);
+							break;
+						default:
+							System.out.println("default" + line);
+					}
 				}
 
 			}	
@@ -62,13 +64,14 @@ public class Assembler {
 	* registers
 	*/
 	public static void setup() {
-		instTypeTable = new HashMap<String, Integer>();
+		// TODO: We are missing a few instructions, such as bne and jr
+		
 		// Instruction type 1 codes are Register codes
 		// Instruction type 2 codes are Immediate codes
 		// lw, sw, addi, ori, andi, slti, beq, e.g. are Immediate codes
 		// add, sub, or, and, slt, sll, srl, jr e.g. are Register codes
 		// j and jal are Jump Commands
-
+		instTypeTable = new HashMap<String, Integer>();
 		instTypeTable.put("add", 1);  	//Register codes
 		instTypeTable.put("sub", 1);
 		instTypeTable.put("or", 1);
@@ -88,9 +91,32 @@ public class Assembler {
 		instTypeTable.put("jal", 3);  
 		
 		// The register table
-		registers = new HashMap<String, String>();
-		
 		// TODO: put all the registers and their binary values in table
+		registerTable = new HashMap<String, Integer>();
+		
+		// This table uses the instruction name as the key and
+		// the value is the corresponding opcode, in binary
+		// TODO: put the instructions and their opcodes (found on first
+		// page of book) in the hashmap
+		opcodeTable = new HashMap<String, Integer>();
+		opcodeTable.put("add", 1);
+		opcodeTable.put("sub", 1);
+		opcodeTable.put("or", 1);
+		opcodeTable.put("and", 1);
+		opcodeTable.put("slt", 1);
+		opcodeTable.put("sll", 1);
+		opcodeTable.put("srl", 1);
+		opcodeTable.put("jr", 1);
+		opcodeTable.put("addi", 2);  	
+		opcodeTable.put("ori", 2);
+		opcodeTable.put("lw", 2);
+		opcodeTable.put("sw", 2);
+		opcodeTable.put("andi", 2);
+		opcodeTable.put("slti", 2);
+		opcodeTable.put("beq", 2);
+		opcodeTable.put("j", 3);  		
+		opcodeTable.put("jal", 3);
+		
 	}
 	
 	/**
@@ -135,6 +161,13 @@ public class Assembler {
 		// rs: 		5 bits
 		// rt: 		5 bits
 		// constant or address: 16 bits
+		String inst = getInstruction(line);
+		int opcode = opcodeTable.get(inst);
+		int rs = 0;
+		int rt = 0;
+		int constant = 0;
+		
+		int binary = opcode << 5 | rs << 5 | rt << 16 | constant;
 		System.out.println("Made it to I-format " + line);
 	}
 	
