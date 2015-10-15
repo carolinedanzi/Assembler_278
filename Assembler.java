@@ -16,7 +16,7 @@ import java.util.Hashtable;
 public class Assembler {
 	
 	public static Hashtable<String, Integer> instTypeTable;
-	//TODO: Decide on type for binary representation of register
+	// TODO: Decide on types for binary string
 	public static Hashtable<String, String> registers;
 	
 	public static void main(String[] args) {
@@ -45,9 +45,9 @@ public class Assembler {
 						doJ_Format(line);
 						break;
 					default:
-						System.out.println(line);
+						System.out.println("default" + line);
 				}
-				System.out.println(line);
+
 			}	
 			
 		} catch(Exception e) {
@@ -62,12 +62,29 @@ public class Assembler {
 	public static void setup() {
 		// The instruction type table
 		instTypeTable = new Hashtable<String, Integer>();
-		
+			
 		//TODO: put all the instructions in here with proper types
 		// R-format = 1
 		// I-format = 2
 		// J-format = 3
-		instTypeTable.put("add", 1);
+		instTypeTable.put("add", 1);  	//Register codes
+		instTypeTable.put("sub", 1);
+		instTypeTable.put("or", 1);
+		instTypeTable.put("and", 1);
+		instTypeTable.put("slt", 1);
+		instTypeTable.put("sll", 1);
+		instTypeTable.put("srl", 1);
+		instTypeTable.put("jr", 1);
+		instTypeTable.put("addi", 2);  	//Immediate codes
+		instTypeTable.put("ori", 2);
+		instTypeTable.put("lw", 2);
+		instTypeTable.put("sw", 2);
+		instTypeTable.put("andi", 2);
+		instTypeTable.put("slti", 2);
+		instTypeTable.put("beq", 2);
+		instTypeTable.put("j", 3);  		//Jump Commands
+		instTypeTable.put("jal", 3);
+		instTypeTable.put("jr", 3);
 		
 		// The register table
 		registers = new Hashtable<String, String>();
@@ -101,6 +118,8 @@ public class Assembler {
 		// rd: 		5 bits
 		// shamt: 	5 bits
 		// funct: 	6 bits
+		System.out.println("Made it to R-format " + line);
+		printToFile(line);
 	}
 	
 	/**
@@ -115,6 +134,7 @@ public class Assembler {
 		// rs: 		5 bits
 		// rt: 		5 bits
 		// constant or address: 16 bits
+		System.out.println("Made it to I-format " + line);
 	}
 	
 	/**
@@ -124,7 +144,7 @@ public class Assembler {
 	* @param line	a line of assembly code, as a String
 	*/
 	public static void doJ_Format(String line) {
-		
+		System.out.println("Made it to J-format " + line);
 	}
 	
 	/**
@@ -133,8 +153,14 @@ public class Assembler {
 	 * @param hex	the line to print to the file
 	 */
 	public static void printToFile(String hex) {
-		PrintWriter pr = new PrintWriter("output.txt");
+		try {
+			PrintWriter pr = new PrintWriter("output.txt");	
+			pr.println(hex);
+			pr.close();
+			
+		} catch(Exception e) {
+			System.out.println(e);
+		}
 		
-		pr.println(hex);
 	}
 }
