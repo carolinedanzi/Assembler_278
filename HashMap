@@ -1,0 +1,30 @@
+	//The 1 line of code below has a bug, according to Eclipse.
+	//"The type Assembler_To_Hex.HashMap is not generic; it cannot be parameterized with arguments<String, Integer>"
+	Map<String, Integer> hashMap = new HashMap<String, Integer>();
+		// Instruction type 1 codes are Register codes
+		// Instruction type 2 codes are Immediate codes
+		// lw, sw, addi, ori, andi, slti, beq, e.g. are Immediate codes
+		// add, sub, or, and, slt, sll, srl, jr e.g. are Register codes
+		// j and jal are Jump Commands
+
+		hashMap.put("add", 1);  	//Register codes
+		hashMap.put("sub", 1);
+		hashMap.put("or", 1);
+		hashMap.put("and", 1);
+		hashMap.put("slt", 1);
+		hashMap.put("sll", 1);
+		hashMap.put("srl", 1);
+		hashMap.put("jr", 1);
+		hashMap.put("addi", 2);  	//Immediate codes
+		hashMap.put("ori", 2);
+		hashMap.put("lw", 2);
+		hashMap.put("sw", 2);
+		hashMap.put("andi", 2);
+		hashMap.put("slti", 2);
+		hashMap.put("beq", 2);
+		hashMap.put("j", 3);  		//Jump Commands
+		hashMap.put("jal", 3);  
+		
+		
+		System.out.println("Display entries in HashMap");
+		System.out.println(hashMap + "\n");
