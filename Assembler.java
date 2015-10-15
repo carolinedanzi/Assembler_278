@@ -87,12 +87,49 @@ public class Assembler {
 		instTypeTable.put("andi", 2);
 		instTypeTable.put("slti", 2);
 		instTypeTable.put("beq", 2);
+		instTypeTable.put("bne", 2);
+		instTypeTable.put("move", 2);
 		instTypeTable.put("j", 3);  		//Jump Commands
-		instTypeTable.put("jal", 3);  
+		instTypeTable.put("jal", 3); 
+		instTypeTable.put("jr", 3);
 		
 		// The register table
+		// The registers are translated from their common name, such as
+		// t0, to their 5-bit binary representation.
 		// TODO: put all the registers and their binary values in table
 		registerTable = new HashMap<String, Integer>();
+		registerTable.put("zero", 0b00000);
+		registerTable.put("at", 0b00001);
+		registerTable.put("v0", 0b00010);
+		registerTable.put("v1", 0b00011);
+		registerTable.put("a0", 0b00100);
+		registerTable.put("a1", 0b00101);
+		registerTable.put("a2", 0b00110);
+		registerTable.put("a3", 0b00111);
+		registerTable.put("t0", 0b01000);
+		registerTable.put("t1", 0b01001);
+		registerTable.put("t2", 0b01010);
+		registerTable.put("t3", 0b01011);
+		registerTable.put("t4", 0b01100);
+		registerTable.put("t5", 0b01101);
+		registerTable.put("t6", 0b01110);
+		registerTable.put("t7", 0b01111);
+		registerTable.put("s0", 0b10000);
+		registerTable.put("s1", 0b10001);
+		registerTable.put("s2", 0b10010);
+		registerTable.put("s3", 0b10011);
+		registerTable.put("s4", 0b10100);
+		registerTable.put("s5", 0b10101);
+		registerTable.put("s6", 0b10110);
+		registerTable.put("s7", 0b10111);
+		registerTable.put("t8", 0b11000);
+		registerTable.put("t9", 0b11001);
+		registerTable.put("k0", 0b11010);
+		registerTable.put("k1", 0b11011);
+		registerTable.put("gp", 0b11100);
+		registerTable.put("sp", 0b11101);
+		registerTable.put("fp", 0b11110);
+		registerTable.put("ra", 0b11111);
 		
 		// This table uses the instruction name as the key and
 		// the value is the corresponding opcode, in binary
@@ -114,8 +151,11 @@ public class Assembler {
 		opcodeTable.put("andi", 2);
 		opcodeTable.put("slti", 2);
 		opcodeTable.put("beq", 2);
+		opcodeTable.put("bne", 2);
+		opcodeTable.put("move", 2);
 		opcodeTable.put("j", 3);  		
 		opcodeTable.put("jal", 3);
+		opcodeTable.put("jr", 3);
 		
 	}
 	
@@ -127,7 +167,6 @@ public class Assembler {
 	* @return 		the instruction as a String
 	*/
 	public static String getInstruction(String line) {
-		// What if there is just loop: or something like that?
 		return line.substring(0, line.indexOf(" "));
 	}
 	
@@ -163,12 +202,18 @@ public class Assembler {
 		// constant or address: 16 bits
 		String inst = getInstruction(line);
 		int opcode = opcodeTable.get(inst);
-		int rs = 0;
-		int rt = 0;
-		int constant = 0;
+		int rs = 0b0;
+		int rt = 0b0;
+		int constant = 0b0;
 		
-		int binary = opcode << 5 | rs << 5 | rt << 16 | constant;
-		System.out.println("Made it to I-format " + line);
+		int binary = opcode << 5;
+		binary = binary | rs;
+		binary = binary << 5;
+		binary = binary | rs;
+		binary = binary << 16;
+		binary = binary | constant;
+		
+		System.out.println("0x" + Integer.toHexString);
 	}
 	
 	/**
@@ -190,9 +235,13 @@ public class Assembler {
 	* @param binary	a string of 0's and 1's 
 	* @return 		a hexadecimal string that equals the binary number
 	*/
-	private static String binaryToHex(String binary) {
-		return "";
-	}
+/* 	private static String binaryToHexString(int binary) {
+		String hex = "";
+		
+		int fourBits = binary & 0000000000001111;
+		
+		return "0x" + hex;
+	} */
 	
 	/**
 	 * Prints a string line to a text file
