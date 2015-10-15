@@ -2,6 +2,7 @@
 * CSE 278 Project 1
 * Dr. Yue
 * This program implements a simple MIPS assembler
+* 
 * @author Matthew Huberty and Caroline Danzi
 * @version 1.0
 *
@@ -82,7 +83,8 @@ public class Assembler {
 	* @return 		the instruction as a String
 	*/
 	public static String getInstruction(String line) {
-		return "";
+		// What if there is just loop: or something like that?
+		return line.substring(0, line.indexOf(" "));
 	}
 	
 	/**
@@ -92,7 +94,13 @@ public class Assembler {
 	* @param line	a line of assembly code, as a String
 	*/
 	public static void doR_Format(String line) {
-		
+		// R-format has the following fields:
+		// opcode:	6 bits
+		// rs:		5 bits
+		// rt: 		5 bits
+		// rd: 		5 bits
+		// shamt: 	5 bits
+		// funct: 	6 bits
 	}
 	
 	/**
@@ -102,7 +110,11 @@ public class Assembler {
 	* @param line	a line of assembly code, as a String
 	*/
 	public static void doI_Format(String line) {
-		
+		// I-format has the following fields:
+		// opcode: 	6 bits
+		// rs: 		5 bits
+		// rt: 		5 bits
+		// constant or address: 16 bits
 	}
 	
 	/**
@@ -113,5 +125,16 @@ public class Assembler {
 	*/
 	public static void doJ_Format(String line) {
 		
+	}
+	
+	/**
+	 * Prints a string line to a text file
+	 * 
+	 * @param hex	the line to print to the file
+	 */
+	public static void printToFile(String hex) {
+		PrintWriter pr = new PrintWriter("output.txt");
+		
+		pr.println(hex);
 	}
 }
