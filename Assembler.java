@@ -23,12 +23,18 @@ public class Assembler {
 		setup();
 		
 		try{
+			// Prepare to read input from file
 			String inputFile = args[0];
 			BufferedReader br = new BufferedReader(new FileReader(inputFile));
+			
+			// Prepare to print output to an output file
+			PrintWriter pw = new PrintWriter("output.txt");	
+			pw.println(line);
 			
 			String line;
 			String instruction;
 			Integer instType;
+			String hexString;
 			
 			while((line = br.readLine()) != null){
 				if(line.length() != 0) {
@@ -37,22 +43,24 @@ public class Assembler {
 				
 					switch(instType) {
 						case 1: 
-							doR_Format(line);
+							hexString = doR_Format(line);
 							break;
 						case 2:
-							doI_Format(line);
+							hexString = doI_Format(line);
 							break;
 						case 3:
-							doJ_Format(line);
+							hexString = doJ_Format(line);
 							break;
 						default:
-							System.out.println("default" + line);
+							hexString = line;
 					}
+					pw.println(hexString);
 				}
 
 			}	
 			
 			br.close();
+			pw.close();
 			
 		} catch(Exception e) {
 			System.out.println(e);
@@ -96,47 +104,46 @@ public class Assembler {
 		// The register table
 		// The registers are translated from their common name, such as
 		// t0, to their 5-bit binary representation.
-		// TODO: put all the registers and their binary values in table
 		registerTable = new HashMap<String, Integer>();
-		registerTable.put("zero", 0b00000);
-		registerTable.put("at", 0b00001);
-		registerTable.put("v0", 0b00010);
-		registerTable.put("v1", 0b00011);
-		registerTable.put("a0", 0b00100);
-		registerTable.put("a1", 0b00101);
-		registerTable.put("a2", 0b00110);
-		registerTable.put("a3", 0b00111);
-		registerTable.put("t0", 0b01000);
-		registerTable.put("t1", 0b01001);
-		registerTable.put("t2", 0b01010);
-		registerTable.put("t3", 0b01011);
-		registerTable.put("t4", 0b01100);
-		registerTable.put("t5", 0b01101);
-		registerTable.put("t6", 0b01110);
-		registerTable.put("t7", 0b01111);
-		registerTable.put("s0", 0b10000);
-		registerTable.put("s1", 0b10001);
-		registerTable.put("s2", 0b10010);
-		registerTable.put("s3", 0b10011);
-		registerTable.put("s4", 0b10100);
-		registerTable.put("s5", 0b10101);
-		registerTable.put("s6", 0b10110);
-		registerTable.put("s7", 0b10111);
-		registerTable.put("t8", 0b11000);
-		registerTable.put("t9", 0b11001);
-		registerTable.put("k0", 0b11010);
-		registerTable.put("k1", 0b11011);
-		registerTable.put("gp", 0b11100);
-		registerTable.put("sp", 0b11101);
-		registerTable.put("fp", 0b11110);
-		registerTable.put("ra", 0b11111);
+		registerTable.put("$zero", 0b00000);
+		registerTable.put("$at", 0b00001);
+		registerTable.put("$v0", 0b00010);
+		registerTable.put("$v1", 0b00011);
+		registerTable.put("$a0", 0b00100);
+		registerTable.put("$a1", 0b00101);
+		registerTable.put("$a2", 0b00110);
+		registerTable.put("$a3", 0b00111);
+		registerTable.put("$t0", 0b01000);
+		registerTable.put("$t1", 0b01001);
+		registerTable.put("$t2", 0b01010);
+		registerTable.put("$t3", 0b01011);
+		registerTable.put("$t4", 0b01100);
+		registerTable.put("$t5", 0b01101);
+		registerTable.put("$t6", 0b01110);
+		registerTable.put("$t7", 0b01111);
+		registerTable.put("$s0", 0b10000);
+		registerTable.put("$s1", 0b10001);
+		registerTable.put("$s2", 0b10010);
+		registerTable.put("$s3", 0b10011);
+		registerTable.put("$s4", 0b10100);
+		registerTable.put("$s5", 0b10101);
+		registerTable.put("$s6", 0b10110);
+		registerTable.put("$s7", 0b10111);
+		registerTable.put("$t8", 0b11000);
+		registerTable.put("$t9", 0b11001);
+		registerTable.put("$k0", 0b11010);
+		registerTable.put("$k1", 0b11011);
+		registerTable.put("$gp", 0b11100);
+		registerTable.put("$sp", 0b11101);
+		registerTable.put("$fp", 0b11110);
+		registerTable.put("$ra", 0b11111);
 		
 		// This table uses the instruction name as the key and
-		// the value is the corresponding opcode, in binary
-		// TODO: put the instructions and their opcodes (found on first
-		// page of book) in the hashmap
+		// the value is the corresponding 6-bit opcode
+		// TODO: put the instructions and their 6-bit opcodes 
+		// (found on first page of book) in the hashmap
 		opcodeTable = new HashMap<String, Integer>();
-		opcodeTable.put("add", 1);
+		opcodeTable.put("add", 0b000000);
 		opcodeTable.put("sub", 1);
 		opcodeTable.put("or", 1);
 		opcodeTable.put("and", 1);
@@ -171,12 +178,13 @@ public class Assembler {
 	}
 	
 	/**
-	* Takes in a line of assembly code and prints the hexadecimal
-	* representation of that line to a file.  This line uses R-format.
+	* Takes in a line of assembly code and returns the hexadecimal
+	* representation of this instruction.  This line uses R-format.
 	*
 	* @param line	a line of assembly code, as a String
+	* @return 		the hexadecimal representation of this instruction
 	*/
-	public static void doR_Format(String line) {
+	public static String doR_Format(String line) {
 		// R-format has the following fields:
 		// opcode:	6 bits - For R-format, this is always 000000
 		// rs:		5 bits
@@ -186,22 +194,34 @@ public class Assembler {
 		// funct: 	6 bits - get this from the opcodeTable
 		
 		System.out.println("Made it to R-format " + line);
-		printToFile(line);
+		return line;
 	}
 	
 	/**
-	* Takes in a line of assembly code and prints the hexadecimal
-	* representation of that line to a file.  This line uses I-format.
+	* Takes in a line of assembly code and returns the hexadecimal
+	* representation of this instruction.  This line uses I-format.
 	*
 	* @param line	a line of assembly code, as a String
+	* @return 		the hexadecimal representation of this instruction
 	*/
-	public static void doI_Format(String line) {
+	public static String doI_Format(String line) {
 		// I-format has the following fields:
 		// opcode: 	6 bits
 		// rs: 		5 bits
 		// rt: 		5 bits
 		// constant or address: 16 bits
+		
 		String inst = getInstruction(line);
+		String rsReg;
+		String rtReg;
+		String address;
+		
+		// lw $t0, 4($sp)
+		if(inst.equals("lw") || inst.equals("sw")) {
+			// rs is found between the parentheses
+			rsReg = line.substring(line.indexOf("(") + 1, line.indexOf(")"));
+		}
+		
 		int opcode = opcodeTable.get(inst);
 		int rs = 0b0;
 		int rt = 0b0;
@@ -214,35 +234,19 @@ public class Assembler {
 		binary = binary << 16;
 		binary = binary | constant;
 		
-		System.out.println("0x" + Integer.toHexString(binary));
+		return "0x" + Integer.toHexString(binary);
 	}
 	
 	/**
-	* Takes in a line of assembly code and prints the hexadecimal
-	* representation of that line to a file.  This line uses J-format.
+	* Takes in a line of assembly code and returns the hexadecimal
+	* representation of this instruction.  This line uses J-format.
 	*
 	* @param line	a line of assembly code, as a String
+	* @return 		the hexadecimal representation of this instruction
 	*/
 	public static void doJ_Format(String line) {
 		System.out.println("Made it to J-format " + line);
 	}
-	
-	/**
-	* Takes in a binary string and converts it to
-	* an equivalent hexadecimal string
-	* NOTE: I just made these Strings for now, and I-format
-	* am not sure what they should be.
-	* 
-	* @param binary	a string of 0's and 1's 
-	* @return 		a hexadecimal string that equals the binary number
-	*/
-/* 	private static String binaryToHexString(int binary) {
-		String hex = "";
-		
-		int fourBits = binary & 0000000000001111;
-		
-		return "0x" + hex;
-	} */
 	
 	/**
 	 * Prints a string line to a text file
