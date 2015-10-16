@@ -137,6 +137,7 @@ public class Assembler {
 			
 			// The offset will be after the space in the line up until the first parentheses
 			constOrAddress = line.substring(line.indexOf(" ") + 1, line.indexOf("("));
+			
 		} else if(inst.equals("bne") || inst.equals("beq")) {
 			// Example: bne $t0, $t1, 8 - $t0 is rs, $t1 is rt, 8 is address
 			
@@ -151,6 +152,7 @@ public class Assembler {
 			
 			// The constant is found after the comma
 			constOrAddress = line.substring(line.indexOf(",") + 1);
+			
 		} else {
 			// Example: addi $t0, $t1, 5 - $t0 is rt, $t1 is rs, 5 is constant or address
 			
@@ -166,13 +168,18 @@ public class Assembler {
 			// The constant is found after the comma
 			constOrAddress = line.substring(line.indexOf(",") + 1);
 		}
+		
 		constOrAddress = constOrAddress.trim();
 		int constant = Integer.parseInt(constOrAddress);
+		// If the constant is negative, it is stored in Java as a 32-bit binary
+		// string with 16 leading 1's.  This would cause problems later on
+		// when we try to add it to the instruction binary string.  So, we need
+		// to just get the last 16 bits, with 0's in the first 16 bits.
+		constant = 0xFFFF & constant;
 		
 		int opcode = opcodeTable.get(inst);
 		int rs = registerTable.get(rsReg);
 		int rt = registerTable.get(rtReg);
-		constant = 0b0000000000000000;
 		
 		int binary = opcode << 5;
 		binary = binary | rs;
@@ -180,6 +187,7 @@ public class Assembler {
 		binary = binary | rt;
 		binary = binary << 16;
 		binary = binary | constant;
+
 		
 		return "0x" + Integer.toHexString(binary);
 	}
