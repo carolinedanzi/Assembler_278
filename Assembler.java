@@ -37,6 +37,12 @@ public class Assembler {
 			
 			while((line = br.readLine()) != null){
 				if(line.length() != 0) {
+							
+					// If the line has a comment, remove the comment
+					if(line.indexOf("#") != -1) {
+						line = line.substring(0, line.indexOf("#"));
+					}
+					
 					instruction = getInstruction(line);
 					instType = instTypeTable.get(instruction);
 				
@@ -112,24 +118,61 @@ public class Assembler {
 		// constant or address: 16 bits
 		
 		String inst = getInstruction(line);
+		// cut line from "addi $t1, $t2, 3" to just "t1, $t2, 3"
+		line = line.substring(line.indexOf("$") + 1); 
+		
 		String rsReg;
 		String rtReg;
-		String address;
+		String constOrAddress;
 		
-		// lw $t0, 4($sp)
 		if(inst.equals("lw") || inst.equals("sw")) {
+			// Example: lw $t0, 4($sp) - $t0 is rt, $sp is rs, 4 is constant or address
+			
 			// rs is found between the parentheses
-			rsReg = line.substring(line.indexOf("(") + 1, line.indexOf(")"));
-			rtReg = line.substring(line.indexOf("$"), line.indexOf("$") + 3);
+			rsReg = line.substring(line.indexOf("(") + 2, line.indexOf(")"));
+			
+			// rt will be the first part of the line (since we removed the instruction) 
+			// up until the first comma
+			rtReg = line.substring(0, line.indexOf(","));
+			
+			// The offset will be after the space in the line up until the first parentheses
+			constOrAddress = line.substring(line.indexOf(" ") + 1, line.indexOf("("));
+		} else if(inst.equals("bne") || inst.equals("beq")) {
+			// Example: bne $t0, $t1, 8 - $t0 is rs, $t1 is rt, 8 is address
+			
+			// rs is the first part of the string (since we removed the instruction)
+			// up until the first comma
+			rsReg = line.substring(0, line.indexOf(","));
+			// remove rs
+			line = line.substring(line.indexOf(",") + 1);
+			
+			// rt is now the first part, past the $ and up until the next comma
+			rtReg = line.substring(line.indexOf("$") + 1, line.indexOf(","));
+			
+			// The constant is found after the comma
+			constOrAddress = line.substring(line.indexOf(",") + 1);
 		} else {
-			rsReg = "$t0";
-			rtReg = "$t1";
+			// Example: addi $t0, $t1, 5 - $t0 is rt, $t1 is rs, 5 is constant or address
+			
+			// rt is the first part of the string (since we removed the instruction)
+			// up until the first comma
+			rtReg = line.substring(0, line.indexOf(","));
+			// remove rt
+			line = line.substring(line.indexOf(",") + 1);
+			
+			// rs is now the first part, past the $ and up until the next comma
+			rsReg = line.substring(line.indexOf("$") + 1, line.indexOf(","));
+			
+			// The constant is found after the comma
+			constOrAddress = line.substring(line.indexOf(",") + 1);
 		}
+		constOrAddress = constOrAddress.trim();
+		int constant = Integer.parseInt(constOrAddress);
 		
 		int opcode = opcodeTable.get(inst);
 		int rs = registerTable.get(rsReg);
 		int rt = registerTable.get(rtReg);
-		int constant = 0b0000000000000000;
+		constant = 0b0000000000000000;
 		
 		int binary = opcode << 5;
 		binary = binary | rs;
@@ -189,38 +232,38 @@ public class Assembler {
 		// The registers are translated from their common name, such as
 		// t0, to their 5-bit binary representation.
 		registerTable = new HashMap<String, Integer>();
-		registerTable.put("$zero", 0b00000);
-		registerTable.put("$at", 0b00001);
-		registerTable.put("$v0", 0b00010);
-		registerTable.put("$v1", 0b00011);
-		registerTable.put("$a0", 0b00100);
-		registerTable.put("$a1", 0b00101);
-		registerTable.put("$a2", 0b00110);
-		registerTable.put("$a3", 0b00111);
-		registerTable.put("$t0", 0b01000);
-		registerTable.put("$t1", 0b01001);
-		registerTable.put("$t2", 0b01010);
-		registerTable.put("$t3", 0b01011);
-		registerTable.put("$t4", 0b01100);
-		registerTable.put("$t5", 0b01101);
-		registerTable.put("$t6", 0b01110);
-		registerTable.put("$t7", 0b01111);
-		registerTable.put("$s0", 0b10000);
-		registerTable.put("$s1", 0b10001);
-		registerTable.put("$s2", 0b10010);
-		registerTable.put("$s3", 0b10011);
-		registerTable.put("$s4", 0b10100);
-		registerTable.put("$s5", 0b10101);
-		registerTable.put("$s6", 0b10110);
-		registerTable.put("$s7", 0b10111);
-		registerTable.put("$t8", 0b11000);
-		registerTable.put("$t9", 0b11001);
-		registerTable.put("$k0", 0b11010);
-		registerTable.put("$k1", 0b11011);
-		registerTable.put("$gp", 0b11100);
-		registerTable.put("$sp", 0b11101);
-		registerTable.put("$fp", 0b11110);
-		registerTable.put("$ra", 0b11111);
+		registerTable.put("zero", 0b00000);
+		registerTable.put("at", 0b00001);
+		registerTable.put("v0", 0b00010);
+		registerTable.put("v1", 0b00011);
+		registerTable.put("a0", 0b00100);
+		registerTable.put("a1", 0b00101);
+		registerTable.put("a2", 0b00110);
+		registerTable.put("a3", 0b00111);
+		registerTable.put("t0", 0b01000);
+		registerTable.put("t1", 0b01001);
+		registerTable.put("t2", 0b01010);
+		registerTable.put("t3", 0b01011);
+		registerTable.put("t4", 0b01100);
+		registerTable.put("t5", 0b01101);
+		registerTable.put("t6", 0b01110);
+		registerTable.put("t7", 0b01111);
+		registerTable.put("s0", 0b10000);
+		registerTable.put("s1", 0b10001);
+		registerTable.put("s2", 0b10010);
+		registerTable.put("s3", 0b10011);
+		registerTable.put("s4", 0b10100);
+		registerTable.put("s5", 0b10101);
+		registerTable.put("s6", 0b10110);
+		registerTable.put("s7", 0b10111);
+		registerTable.put("t8", 0b11000);
+		registerTable.put("t9", 0b11001);
+		registerTable.put("k0", 0b11010);
+		registerTable.put("k1", 0b11011);
+		registerTable.put("gp", 0b11100);
+		registerTable.put("sp", 0b11101);
+		registerTable.put("fp", 0b11110);
+		registerTable.put("ra", 0b11111);
 		
 		// This table uses the instruction name as the key and
 		// the value is the corresponding 6-bit opcode or function
@@ -237,7 +280,7 @@ public class Assembler {
 		opcodeTable.put("addi", 0b001000);  	
 		opcodeTable.put("ori", 0b001101);
 		opcodeTable.put("lw", 0b100011);
-		opcodeTable.put("sw", 0b1001011);
+		opcodeTable.put("sw", 0b101011);
 		opcodeTable.put("andi", 0b001100);
 		opcodeTable.put("slti", 0b001010);
 		opcodeTable.put("beq", 0b000100);
