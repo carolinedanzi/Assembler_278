@@ -165,8 +165,12 @@ public class Assembler {
 		binary = binary | shamt;
 		binary = binary << 6;
 		binary = binary | func;
-
-		return "0x" + Integer.toHexString(binary);
+		
+		String retLine = Integer.toHexString(binary);
+		while(retLine.length() < 8) {
+			retLine = "0" + retLine;
+		}
+		return "0x" + retLine;
 	}
 	
 	/**
@@ -254,8 +258,11 @@ public class Assembler {
 		binary = binary << 16;
 		binary = binary | constant;
 
-		
-		return "0x" + Integer.toHexString(binary);
+		String retLine = Integer.toHexString(binary);
+		while(retLine.length() < 8) {
+			retLine = "0" + retLine;
+		}
+		return "0x" + retLine;
 	}
 	
 	/**
@@ -284,7 +291,11 @@ public class Assembler {
 		int binary = opcode << 26;
 		binary = binary | to;
 
-		return "0x" + Integer.toHexString(binary);
+		String retLine = Integer.toHexString(binary);
+		while(retLine.length() < 8) {
+			retLine = "0" + retLine;
+		}
+		return "0x" + retLine;
 	}
 	
 	/**
