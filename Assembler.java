@@ -99,8 +99,74 @@ public class Assembler {
 		// shamt: 	5 bits
 		// funct: 	6 bits - get this from the opcodeTable
 		
-		System.out.println("Made it to R-format " + line);
-		return line;
+		String inst = getInstruction(line);
+		//cut line from "add $t0, $s1, $s2
+		line = line.substring(line.indexOf("$") + 1);
+		//NOW, the line is:  t0, $s1, $s2
+		
+		//Create some local variables
+		String rsReg = null;
+		String rtReg = null;
+		String rdReg = null;
+	
+		int shamt;
+		
+		if(inst.equals("add") || inst.equals("sub") || inst.equals("or") || inst.equals("and")){
+			// Example:  add $t0, $s1, $s2 => at this point will be t0, $s1, $s2
+			rdReg = line.substring(0, line.indexOf(",")); //t0
+			line = line.substring(line.indexOf("$") + 1).trim(); //s1, $s2
+			
+			rsReg = line.substring(0, line.indexOf(",")); //s1
+			line = line.substring(line.indexOf("$")).trim();
+			
+			rtReg = line.substring(1);
+			shamt = 0b00000;
+		}
+		else if (inst.equals("srl") || inst.equals("sll")){
+			// At this point will be t0, $t1, 4
+			rdReg = line.substring(0, line.indexOf(",")); //t0, $t1, 4
+			line = line.substring(line.indexOf("$") + 1).trim(); //t1, 4
+			
+			rtReg = line.substring(0, line.indexOf(",")); //s1
+			line = line.substring(line.indexOf(",") + 1).trim();
+			//Per the textbook, in a shift left, rs field is unused and is set to zero.
+			rsReg = "zero";
+			shamt = Integer.parseInt(line);
+		}
+		else{
+			//Format the jr code, which is type:  R
+			//Typical jr statements would be:  jr $ra
+			rdReg = "zero";
+			rtReg = "zero";
+			shamt = 0b00000;
+			rsReg = line.substring(line.indexOf(" ")).trim();
+		}
+		// The opcode for all R-format instructions  is 0
+		int opcode = 0b000000;
+		// jr uses a number for the address, which is stored in rs
+		int rs;
+		if(inst.equals("jr")) {
+			rs = Integer.parseInt(rsReg);
+			rs = 0xFFFF & rs;
+		} else {
+			rs = registerTable.get(rsReg);
+		}
+		int rt = registerTable.get(rtReg);
+		int rd = registerTable.get(rdReg); 
+		int func = opcodeTable.get(inst);
+		
+		int binary = opcode << 5;
+		binary = binary | rs;
+		binary = binary << 5;
+		binary = binary | rt;	
+		binary = binary << 5;
+		binary = binary | rd;
+		binary = binary << 5;
+		binary = binary | shamt;
+		binary = binary << 6;
+		binary = binary | func;
+
+		return "0x" + Integer.toHexString(binary);
 	}
 	
 	/**
@@ -200,17 +266,32 @@ public class Assembler {
 	* @return 		the hexadecimal representation of this instruction
 	*/
 	public static String doJ_Format(String line) {
-		System.out.println("Made it to J-format " + line);
-		return line;
+		// J-format has the following fields:
+		// opcode:	6 bits - For J-format, this is always 0001xx.  
+		//   If the leftmost bits are 00001x, the instruction is an unconditional jump, and the remaining bits represent an offset from the PC. 
+		// targetOffset:  26 bits
+		
+		String inst = getInstruction(line);
+		//cut line from "j 8".  j C means go to address C.  This unconditionally jumps to the instruction at the specified address.
+		//cut line from "jal -8"  For a procedure call -- used to call a subroutine.
+		line = line.substring(line.indexOf(" ")).trim();
+		//NOW, the line is:  24, or -8, or 8, etc.
+		
+		int opcode = opcodeTable.get(inst);
+		int to = Integer.parseInt(line); 
+		// If to is negative, and with 26 1's to remove leading ones
+		to = 0x3FFFFFF & to;
+		int binary = opcode << 26;
+		binary = binary | to;
+
+		return "0x" + Integer.toHexString(binary);
 	}
 	
 	/**
 	* This sets up the HashTables for the instruction types and 
 	* registers
 	*/
-	public static void setup() {
-		// TODO: We are missing a few instructions, such as bne and jr
-		
+	public static void setup() {		
 		// Instruction type 1 codes are Register codes
 		// Instruction type 2 codes are Immediate codes
 		// lw, sw, addi, ori, andi, slti, beq, e.g. are Immediate codes

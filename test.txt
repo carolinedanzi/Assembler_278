@@ -13,3 +13,5 @@ addi $s0, $s0, 1 # increment row counter
 bne $s0, $t0, -8 # not at bottom of column so loop back
 addi $s1, $s1, 1 # increment column counter
 bne $s1, $t1, -12 # loop back if not at end of matrix (past the last column)
+jr 24 # jump back to the address at $ra
+jal -8  #jump to address $ra
